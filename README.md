@@ -1,2 +1,0 @@
-# sup-news
-Begin app
