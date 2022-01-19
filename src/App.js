@@ -1,40 +1,70 @@
 import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
+import axios from 'axios'
+
 import './App.css';
 
 const App = () => {
-  const [message, setMessage] = useState('...loading')
+  const [news, setNews] = useState([])
 
   useEffect(() => {
     async function fetchData () {
       try {
-        let data = await (await fetch('/api')).json()
-        setMessage(data.message)
+        const { data } = await axios.get('/api/news')
+        setNews(data.news)
       } catch (err) {
-        setMessage(err.message)
+        setNews(err.message)
       }
     }
     fetchData()
-  })
+  }, [])
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      let { data } = await axios.post('/api/news/create', {
+        title: e.currentTarget.elements.title.value,
+        content: e.currentTarget.elements.content.value
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(data.news)
+      setNews(data.news)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  console.log(news)
 
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>{message}</p>
-        <p>Change me!</p>
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <h1>
+          Learn serverless <br />
+          <small>using Begin</small>
+        </h1>
       </header>
+      <form className="App-form" onSubmit={handleSubmit}>
+        <fieldset>
+          <legend>Begin API</legend>
+          <input type="text" id="title" placeholder="Titulo" />
+          <textarea id="content" placeholder="Texto" />
+        </fieldset>
+        <button type="submit">salvar</button>
+      </form>
+      <section>
+        <h2>News</h2>
+        <ul className="App-list">
+          {news && news.map(({ title, content }) => (
+            <li key={title}>
+              <h3>{title}</h3>
+              <p>{content}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }
